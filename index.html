@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Update</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #000;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 25px;
+}
+
+h1 {
+    font-size: clamp(26px, 7vw, 40px);
+    font-weight: normal;
+}
+
+.message {
+    color: #ccc;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.timer {
+    font-size: clamp(60px, 18vw, 100px);
+    margin: 25px 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.progress {
+    width: min(320px, 85vw);
+    height: 4px;
+    background: #333;
+}
+
+.bar {
+    height: 100%;
+    width: 100%;
+    background: white;
+    transition: width 1s linear;
+}
+
+button {
+    margin-top: 30px;
+    padding: 12px 25px;
+    border: 1px solid #777;
+    border-radius: 8px;
+    background: transparent;
+    color: white;
+    font-size: 16px;
+}
+
+#safe {
+    display: none;
+    background: #111;
+}
+
+#safe h1 {
+    font-size: 34px;
+}
+
+#safe p {
+    color: #ccc;
+    line-height: 1.7;
+}
+</style>
+</head>
+
+<body>
+
+<section id="shutdown" class="screen">
+
+    <div style="font-size:50px">📱</div>
+
+    <h1>System shutting down…</h1>
+
+    <p class="message">
+        Please wait while your device<br>
+        completes the shutdown process.
+    </p>
+
+    <div id="timer" class="timer">01:00</div>
+
+    <div class="progress">
+        <div id="bar" class="bar"></div>
+    </div>
+
+    <button id="cancel">Cancel</button>
+
+    <p style="color:#777;font-size:12px;margin-top:25px">
+        Harmless prank — no actual shutdown.
+    </p>
+
+</section>
+
+<section id="safe" class="screen">
+
+    <div style="font-size:60px">😄</div>
+
+    <h1>Got you!</h1>
+
+    <p>
+        Your phone is completely safe.<br>
+        Nothing was switched off.
+    </p>
+
+    <p>This was just a 60-second prank.</p>
+
+    <button id="again">Play Again</button>
+
+</section>
+
+<script>
+"use strict";
+
+const shutdown = document.getElementById("shutdown");
+const safe = document.getElementById("safe");
+const timer = document.getElementById("timer");
+const bar = document.getElementById("bar");
+
+let seconds = 60;
+let interval = null;
+
+function formatTime(s) {
+    return "00:" + String(s).padStart(2, "0");
+}
+
+function update() {
+    timer.textContent = formatTime(seconds);
+    bar.style.width = (seconds / 60 * 100) + "%";
+}
+
+function finish() {
+    clearInterval(interval);
+    interval = null;
+    shutdown.style.display = "none";
+    safe.style.display = "flex";
+}
+
+function start() {
+    clearInterval(interval);
+
+    seconds = 60;
+
+    shutdown.style.display = "flex";
+    safe.style.display = "none";
+
+    update();
+
+    interval = setInterval(function() {
+        seconds--;
+        update();
+
+        if (seconds <= 0) {
+            finish();
+        }
+    }, 1000);
+}
+
+document.getElementById("cancel").onclick = finish;
+
+document.getElementById("again").onclick = start;
+
+start();
+</script>
+
+</body>
+  </html>
