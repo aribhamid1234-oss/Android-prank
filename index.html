@@ -19,65 +19,171 @@ body {
     padding: 0;
     background: #000;
     overflow: hidden;
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     user-select: none;
     -webkit-user-select: none;
-    touch-action: none;
+    -webkit-touch-callout: none;
 }
 
-body {
-    cursor: none;
-}
+/* =========================================
+   MAIN SCREEN
+========================================= */
 
 #screen {
     position: fixed;
     inset: 0;
+
     width: 100%;
     height: 100vh;
     height: 100dvh;
+
+    background: #000;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #000;
-    color: #fff;
+
     text-align: center;
+
+    overflow: hidden;
+
     z-index: 999999;
 }
 
+/* =========================================
+   HACKER CONTENT
+========================================= */
+
 #message {
     display: none;
+
+    width: 100%;
+    max-width: 900px;
+
     padding: 20px;
-    pointer-events: none;
 }
 
+/* Hacker image */
+
+#hackerImage {
+    display: block;
+
+    width: min(75vw, 430px);
+    max-height: 48vh;
+
+    object-fit: contain;
+
+    margin: 0 auto 10px auto;
+
+    filter:
+        drop-shadow(0 0 8px #00ff66)
+        drop-shadow(0 0 20px rgba(0, 255, 102, 0.7));
+
+    animation: hackerPulse 2s infinite alternate;
+}
+
+/* =========================================
+   TITLE
+========================================= */
+
 #message h1 {
-    margin: 0;
+    margin: 5px 0 0 0;
+
     color: #00ff66;
-    font-size: clamp(30px, 8vw, 70px);
+
+    font-size: clamp(30px, 8vw, 72px);
+
     font-weight: bold;
+
     letter-spacing: 3px;
+
+    line-height: 1.1;
+
     text-shadow:
         0 0 5px #00ff66,
         0 0 15px #00ff66,
-        0 0 30px #00ff66;
-    animation: hackerGlow 1.2s infinite alternate;
+        0 0 30px #00ff66,
+        0 0 60px rgba(0, 255, 102, 0.7);
+
+    animation: textGlow 1.2s infinite alternate;
 }
 
-#message p {
-    margin-top: 25px;
-    color: #aaa;
-    font-size: 14px;
+/* =========================================
+   SUBTITLE
+========================================= */
+
+.subtitle {
+    margin-top: 22px;
+
+    color: #00ff66;
+
+    font-size: clamp(15px, 3vw, 22px);
+
+    letter-spacing: 2px;
+
+    text-shadow:
+        0 0 8px #00ff66;
 }
+
+/* =========================================
+   COUNTDOWN
+========================================= */
 
 #countdown {
-    margin-top: 20px;
+    margin-top: 25px;
+
     color: #777;
-    font-size: 14px;
+
+    font-size: clamp(13px, 2.5vw, 17px);
+
+    letter-spacing: 2px;
 }
 
-@keyframes hackerGlow {
+#countNumber {
+    color: #00ff66;
+
+    font-weight: bold;
+
+    text-shadow:
+        0 0 8px #00ff66;
+}
+
+/* =========================================
+   FINISHED SCREEN
+========================================= */
+
+#finished {
+    display: none;
+
+    color: #00ff66;
+
+    font-size: 18px;
+
+    text-shadow:
+        0 0 10px #00ff66;
+}
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes hackerPulse {
+
     from {
-        opacity: 0.7;
+        transform: scale(0.98);
+        opacity: 0.85;
+    }
+
+    to {
+        transform: scale(1.02);
+        opacity: 1;
+    }
+}
+
+@keyframes textGlow {
+
+    from {
+        opacity: 0.75;
     }
 
     to {
@@ -85,156 +191,460 @@ body {
     }
 }
 
-#finished {
-    display: none;
-    color: #00ff66;
-    font-size: 18px;
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+    #message {
+        padding: 15px;
+    }
+
+    #hackerImage {
+        width: min(85vw, 350px);
+        max-height: 42vh;
+    }
+
+    #message h1 {
+        letter-spacing: 2px;
+    }
 }
 </style>
 </head>
 
 <body>
 
+<!-- =========================================
+     MAIN LOCK SCREEN
+========================================= -->
+
 <main id="screen">
 
-    <div id="message">
-        <h1>HAMID THE HACKER</h1>
+    <!-- Hacker message -->
 
-        <p>System access complete...</p>
+    <div id="message">
+
+        <img
+            id="hackerImage"
+            src="hacker-mask.png"
+            alt="Hacker Mask"
+        >
+
+        <h1>
+            HAMID THE HACKER
+        </h1>
+
+        <div class="subtitle">
+            SYSTEM ACCESS COMPLETE...
+        </div>
 
         <div id="countdown">
-            Locked for 60 seconds
+            SYSTEM LOCKED FOR
+            <span id="countNumber">60</span>
+            SECONDS
         </div>
+
     </div>
 
+    <!-- Finished message -->
+
     <div id="finished">
-        Prank finished.
+        PRANK FINISHED.
     </div>
 
 </main>
 
+
 <script>
 "use strict";
 
+/* =========================================
+   ELEMENTS
+========================================= */
+
 const screen = document.getElementById("screen");
 const message = document.getElementById("message");
-const countdown = document.getElementById("countdown");
 const finished = document.getElementById("finished");
+const countNumber = document.getElementById("countNumber");
 
-let remainingSeconds = 60;
-let countdownInterval = null;
+
+/* =========================================
+   SETTINGS
+========================================= */
+
+/*
+    Blank black screen duration before
+    the hacker appears.
+*/
+
+const BLANK_TIME = 3000;
+
+
+/*
+    Hacker screen duration.
+
+    60 seconds = 60000 milliseconds.
+*/
+
+const LOCK_TIME = 60000;
+
+
+/* =========================================
+   LOCK STATE
+========================================= */
+
 let pageLocked = true;
 
-/*
-    Prevent normal webpage interaction.
-*/
+let remainingSeconds = 60;
 
-function blockEvent(event) {
-    if (pageLocked) {
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
-    }
-}
+let countdownInterval = null;
 
-document.addEventListener("click", blockEvent, true);
-document.addEventListener("dblclick", blockEvent, true);
-document.addEventListener("contextmenu", blockEvent, true);
-document.addEventListener("mousedown", blockEvent, true);
-document.addEventListener("mouseup", blockEvent, true);
-document.addEventListener("touchstart", blockEvent, true);
-document.addEventListener("touchmove", blockEvent, true);
-document.addEventListener("touchend", blockEvent, true);
-document.addEventListener("selectstart", blockEvent, true);
-document.addEventListener("dragstart", blockEvent, true);
 
-/*
-    Block common webpage keyboard actions.
-    Browser-level controls cannot be fully disabled.
-*/
+/* =========================================
+   BLOCK NORMAL PAGE INTERACTION
+========================================= */
 
-document.addEventListener("keydown", function (event) {
+function blockInteraction(event) {
+
     if (!pageLocked) {
         return;
     }
 
-    const blockedKeys = [
-        "Escape",
-        "F5",
-        "F11",
-        "F12",
-        "Tab"
-    ];
+    event.preventDefault();
+    event.stopPropagation();
 
-    const blockedCombination =
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey;
+    return false;
+}
 
-    if (
-        blockedKeys.includes(event.key) ||
-        blockedCombination
-    ) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-}, true);
 
 /*
-    Try to keep the page active when it loses focus.
-    This cannot override browser or operating-system controls.
+    Mouse
 */
 
-window.addEventListener("blur", function () {
-    if (pageLocked) {
-        document.title = "HAMID THE HACKER";
-    }
-});
+document.addEventListener(
+    "click",
+    blockInteraction,
+    true
+);
+
+document.addEventListener(
+    "dblclick",
+    blockInteraction,
+    true
+);
+
+document.addEventListener(
+    "mousedown",
+    blockInteraction,
+    true
+);
+
+document.addEventListener(
+    "mouseup",
+    blockInteraction,
+    true
+);
+
 
 /*
-    Stage 1:
-    Completely blank black screen for 3 seconds.
+    Touch
 */
 
-setTimeout(function () {
-    message.style.display = "block";
-}, 3000);
+document.addEventListener(
+    "touchstart",
+    blockInteraction,
+    true
+);
+
+document.addEventListener(
+    "touchmove",
+    blockInteraction,
+    true
+);
+
+document.addEventListener(
+    "touchend",
+    blockInteraction,
+    true
+);
+
 
 /*
-    Stage 2:
-    Keep the prank locked for 60 seconds.
+    Right click
 */
 
-countdownInterval = setInterval(function () {
-    remainingSeconds--;
+document.addEventListener(
+    "contextmenu",
+    blockInteraction,
+    true
+);
 
-    countdown.textContent =
-        "Locked for " + remainingSeconds + " seconds";
 
-    if (remainingSeconds <= 0) {
-        clearInterval(countdownInterval);
+/*
+    Text selection
+*/
 
-        pageLocked = false;
+document.addEventListener(
+    "selectstart",
+    blockInteraction,
+    true
+);
 
-        screen.innerHTML = "";
-        screen.style.display = "none";
 
-        document.body.style.cursor = "default";
-        document.body.style.overflow = "auto";
+/*
+    Dragging
+*/
+
+document.addEventListener(
+    "dragstart",
+    blockInteraction,
+    true
+);
+
+
+/* =========================================
+   KEYBOARD PROTECTION
+========================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (!pageLocked) {
+            return;
+        }
 
         /*
-            Attempt to close the tab.
-            Browsers usually block this unless the tab
-            was opened by JavaScript.
+            Prevent common webpage controls.
         */
 
-        try {
-            window.close();
-        } catch (error) {
-            console.log("The browser blocked automatic closing.");
+        const blockedKeys = [
+            "Escape",
+            "Tab",
+            "F5",
+            "F11",
+            "F12"
+        ];
+
+        const blockedKey =
+            blockedKeys.includes(event.key);
+
+        /*
+            Prevent common Ctrl / Command
+            / Alt combinations while the page
+            is active.
+        */
+
+        const blockedCombination =
+            event.ctrlKey ||
+            event.metaKey ||
+            event.altKey;
+
+        if (
+            blockedKey ||
+            blockedCombination
+        ) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            return false;
         }
+
+    },
+    true
+);
+
+
+/* =========================================
+   BROWSER BACK BUTTON
+========================================= */
+
+history.pushState(
+    null,
+    "",
+    location.href
+);
+
+window.addEventListener(
+    "popstate",
+    function() {
+
+        if (pageLocked) {
+
+            history.pushState(
+                null,
+                "",
+                location.href
+            );
+        }
+
     }
-}, 1000);
+);
+
+
+/* =========================================
+   PREVENT PAGE LEAVING THROUGH
+   NORMAL JAVASCRIPT NAVIGATION
+========================================= */
+
+window.addEventListener(
+    "beforeunload",
+    function(event) {
+
+        if (pageLocked) {
+
+            event.preventDefault();
+
+            event.returnValue = "";
+
+            return "";
+        }
+
+    }
+);
+
+
+/* =========================================
+   SHOW HACKER SCREEN
+========================================= */
+
+setTimeout(
+    function() {
+
+        if (!pageLocked) {
+            return;
+        }
+
+        message.style.display = "block";
+
+        startCountdown();
+
+    },
+    BLANK_TIME
+);
+
+
+/* =========================================
+   COUNTDOWN
+========================================= */
+
+function startCountdown() {
+
+    remainingSeconds = 60;
+
+    countNumber.textContent =
+        remainingSeconds;
+
+    countdownInterval = setInterval(
+        function() {
+
+            remainingSeconds--;
+
+            if (remainingSeconds < 0) {
+                remainingSeconds = 0;
+            }
+
+            countNumber.textContent =
+                remainingSeconds;
+
+            if (remainingSeconds <= 0) {
+
+                clearInterval(
+                    countdownInterval
+                );
+
+                finishPrank();
+            }
+
+        },
+        1000
+    );
+}
+
+
+/* =========================================
+   FINISH
+========================================= */
+
+function finishPrank() {
+
+    pageLocked = false;
+
+    /*
+        Stop countdown.
+    */
+
+    if (countdownInterval !== null) {
+
+        clearInterval(
+            countdownInterval
+        );
+
+        countdownInterval = null;
+    }
+
+
+    /*
+        Remove hacker screen.
+    */
+
+    message.style.display = "none";
+
+
+    /*
+        Attempt to close the tab.
+
+        IMPORTANT:
+        Modern browsers normally prevent a
+        webpage from closing a tab that the
+        user opened themselves.
+    */
+
+    try {
+
+        window.close();
+
+    } catch (error) {
+
+        console.log(
+            "Browser prevented automatic closing."
+        );
+    }
+
+
+    /*
+        If browser refuses to close the tab,
+        leave the screen black.
+    */
+
+    setTimeout(
+        function() {
+
+            screen.innerHTML = "";
+
+            screen.style.display = "none";
+
+            document.body.style.background =
+                "#000";
+
+            document.body.style.overflow =
+                "auto";
+
+        },
+        500
+    );
+}
+
+
+/* =========================================
+   KEEP TITLE
+========================================= */
+
+document.title =
+    "HAMID THE HACKER";
+
 </script>
 
 </body>
